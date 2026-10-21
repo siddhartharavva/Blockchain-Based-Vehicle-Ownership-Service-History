@@ -1,0 +1,21 @@
+flowchart LR
+  subgraph L0["Level 0: context"]
+    direction LR
+    Users["RTO / Dealer / Service centre<br/>Insurer / Bank / Owner / Public"] -- "records, transfer actions, queries" --> Sys(("Vehicle History DApp"))
+    Sys -- "verified history, receipts, PDF" --> Users
+  end
+  subgraph L1["Level 1"]
+    direction TB
+    E1["Organisations"] --> P1(("1 Manage roles"))
+    E1 --> P2(("2 Register vehicle"))
+    E1 --> P4(("4 Add service / accident /<br/>policy / loan records"))
+    E2["Owners"] --> P3(("3 Transfer ownership"))
+    E3["Public"] --> P5(("5 Verify history"))
+    P1 --> D1[("D1 Roles")]
+    P2 --> D2[("D2 Vehicles + owners")]
+    P3 --> D2
+    P4 --> D3[("D3 History records")]
+    P2 & P4 --> D4[("D4 IPFS documents")]
+    D2 & D3 & D4 --> P5
+    D1 --> P2 & P3 & P4
+  end

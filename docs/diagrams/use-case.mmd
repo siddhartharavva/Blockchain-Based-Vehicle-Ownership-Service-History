@@ -1,0 +1,36 @@
+flowchart LR
+  Admin(("Admin"))
+  RTO(("RTO"))
+  Dealer(("Manufacturer /<br/>Dealer"))
+  Owner(("Owner"))
+  SC(("Service<br/>Centre"))
+  Ins(("Insurer"))
+  Bank(("Bank"))
+  Public(("Buyer /<br/>Public"))
+  subgraph System["Vehicle Ownership & Service History DApp"]
+    UC1([Grant / revoke roles])
+    UC2([Name organisations])
+    UC3([Register vehicle])
+    UC4([Create vehicle record])
+    UC5([Assign number plate])
+    UC6([Approve transfer])
+    UC7([Flag / clear stolen])
+    UC8([Initiate transfer])
+    UC9([Accept / cancel transfer])
+    UC10([Share private documents for a time])
+    UC11([Add service record])
+    UC12([Add accident record])
+    UC13([Add insurance policy])
+    UC14([Record / clear loan])
+    UC15([Verify history by VIN or QR])
+    UC16([Download PDF report])
+    UC17([Check document hash])
+  end
+  Admin --- UC1 & UC2
+  RTO --- UC3 & UC5 & UC6 & UC7
+  Dealer --- UC4
+  Owner --- UC8 & UC9 & UC10
+  SC --- UC11
+  Ins --- UC12 & UC13
+  Bank --- UC14
+  Public --- UC15 & UC16 & UC17

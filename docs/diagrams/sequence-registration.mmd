@@ -1,0 +1,17 @@
+sequenceDiagram
+  actor RTO
+  participant UI as React app
+  participant IPFS as IPFS (Pinata)
+  participant MM as MetaMask
+  participant C as VehicleRegistry
+  participant N as VehicleNFT
+  RTO->>UI: Fill vehicle details + choose RC scan
+  UI->>IPFS: upload file
+  IPFS-->>UI: CID
+  RTO->>UI: Register vehicle
+  UI->>MM: registerVehicle(spec with CID)
+  MM->>C: signed transaction
+  C->>C: check RTO_ROLE, VIN length 17, VIN and plate unique
+  C->>N: mint(owner, tokenIdOf(vin))
+  C-->>UI: emit VehicleRegistered(vin, owner, rto)
+  UI-->>RTO: "confirmed in block N"

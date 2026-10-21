@@ -1,0 +1,17 @@
+sequenceDiagram
+  actor A as Owner A (seller)
+  actor B as Owner B (buyer)
+  actor R as RTO
+  participant C as VehicleRegistry
+  participant N as VehicleNFT
+  A->>C: initiateTransfer(vin, B)
+  C->>C: caller is owner, B valid, not stolen, no active loan, none pending
+  C-->>B: emit TransferInitiated (notification badge)
+  B->>C: acceptTransfer(vin)
+  C-->>R: emit TransferAccepted (shows in approval queue)
+  R->>C: approveTransfer(vin)
+  C->>C: buyer accepted? still not stolen / no loan?
+  C->>C: close A's ownership record, open B's
+  C->>N: move(A, B, tokenId)
+  C-->>A: emit OwnershipTransferred(vin, A, B)
+  Note over A,B: Either party may cancelTransfer(vin) before approval

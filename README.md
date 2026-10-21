@@ -2,6 +2,11 @@
 
 A decentralized application (DApp) that records a vehicle's **registration, ownership transfers, maintenance and service history, and accident/insurance events** on a blockchain. Records are tamper-resistant, every change is traceable to who made it, and buyers, insurers and authorities can verify a vehicle's complete history before trusting it.
 
+> **Status:** every feature in section 5 (must-have, should-have and nice-to-have) is implemented and tested.
+> See [CHECKLIST.md](CHECKLIST.md) for where each item lives and how it was verified,
+> [docs/DESIGN.md](docs/DESIGN.md) for the design, SOLID mapping, test and gas tables, and
+> [docs/FUNCTIONS.md](docs/FUNCTIONS.md) for the function registry.
+
 ---
 
 ## Table of Contents
@@ -80,31 +85,31 @@ Roles are implemented using **OpenZeppelin `AccessControl`**.
 
 ### 5.1 Must-have (core, implement these first)
 
-- [ ] **Wallet login** with MetaMask (the wallet address is the user identity).
-- [ ] **Role-based access control**: admin can add/remove RTO, service centres and insurers.
-- [ ] **Vehicle registration** by RTO: VIN, registration number, make, model, year, colour, engine number, first owner, document hash.
-- [ ] **Ownership transfer** in steps: owner initiates → buyer accepts → RTO approves → owner updated. Full ownership history kept.
-- [ ] **Service records** added by authorized service centres: date, odometer, service type, description, cost, invoice on IPFS.
-- [ ] **Odometer validation**: the contract rejects a reading lower than the last recorded reading.
-- [ ] **Accident / insurance records** added by insurers.
-- [ ] **Vehicle history page**: search by VIN and see a timeline of every event with the transaction hash.
-- [ ] **Document upload to IPFS** with the CID stored on-chain.
-- [ ] **Events** emitted for every action, so the frontend can build the timeline.
+- [x] **Wallet login** with MetaMask (the wallet address is the user identity).
+- [x] **Role-based access control**: admin can add/remove RTO, service centres and insurers.
+- [x] **Vehicle registration** by RTO: VIN, registration number, make, model, year, colour, engine number, first owner, document hash.
+- [x] **Ownership transfer** in steps: owner initiates → buyer accepts → RTO approves → owner updated. Full ownership history kept.
+- [x] **Service records** added by authorized service centres: date, odometer, service type, description, cost, invoice on IPFS.
+- [x] **Odometer validation**: the contract rejects a reading lower than the last recorded reading.
+- [x] **Accident / insurance records** added by insurers.
+- [x] **Vehicle history page**: search by VIN and see a timeline of every event with the transaction hash.
+- [x] **Document upload to IPFS** with the CID stored on-chain.
+- [x] **Events** emitted for every action, so the frontend can build the timeline.
 
 ### 5.2 Should-have (good for marks, do after core works)
 
-- [ ] **QR code** for each vehicle that opens its public history page.
-- [ ] **Stolen / blacklist flag** set by RTO; transfers are blocked while flagged.
-- [ ] **Verification badge**: shows who wrote each record (RTO, which service centre) and whether the IPFS file matches the stored hash.
-- [ ] **Dashboard per role** (RTO, service centre, insurer, owner).
-- [ ] **Downloadable history report** (PDF) for a buyer.
+- [x] **QR code** for each vehicle that opens its public history page.
+- [x] **Stolen / blacklist flag** set by RTO; transfers are blocked while flagged.
+- [x] **Verification badge**: shows who wrote each record (RTO, which service centre) and whether the IPFS file matches the stored hash.
+- [x] **Dashboard per role** (RTO, service centre, insurer, owner).
+- [x] **Downloadable history report** (PDF) for a buyer.
 
 ### 5.3 Nice-to-have (only if time allows)
 
-- [ ] Vehicle represented as an **NFT (ERC-721)**, where the token owner is the vehicle owner.
-- [ ] Owner can grant **time-limited access** to private documents to a specific buyer.
-- [ ] Notifications when a transfer request arrives.
-- [ ] Loan/hypothecation record by a bank that blocks transfer until cleared.
+- [x] Vehicle represented as an **NFT (ERC-721)**, where the token owner is the vehicle owner.
+- [x] Owner can grant **time-limited access** to private documents to a specific buyer.
+- [x] Notifications when a transfer request arrives.
+- [x] Loan/hypothecation record by a bank that blocks transfer until cleared.
 
 ## 6. Tech Stack
 
@@ -312,35 +317,47 @@ The navbar shows only the pages the connected wallet's role allows. The frontend
 ## 10. Project Structure
 
 ```
-vehicle-blockchain/
+.
 ├── contracts/
-│   └── VehicleRegistry.sol
+│   ├── VehicleRegistry.sol            # composes the modules below (one address, one ABI)
+│   ├── VehicleNFT.sol                 # ERC-721 title token, movable only by the registry
+│   ├── interfaces/IVehicleNFT.sol
+│   ├── libraries/VehicleTypes.sol     # every struct, defined once
+│   └── modules/
+│       ├── RegistryAccess.sol         # roles (AccessControlEnumerable) + organisation names
+│       ├── VehicleCore.sol            # vehicles, ownership history, odometer, stolen flag
+│       ├── OwnershipTransferModule.sol
+│       ├── ServiceHistoryModule.sol
+│       ├── InsuranceModule.sol        # accidents + insurance policies
+│       ├── LoanModule.sol             # hypothecation, blocks transfers
+│       └── DocumentAccessModule.sol   # private docs with time-limited access
 ├── scripts/
-│   ├── deploy.js              # deploys and writes address + ABI to frontend
-│   └── seed.js                # demo data: roles, vehicles, services, transfer
-├── test/
-│   └── VehicleRegistry.test.js
+│   ├── deploy.js                      # deploys and writes address + ABI to frontend
+│   ├── seed.js                        # demo data: roles, vehicles, services, transfer, loan
+│   └── lib/                           # shared deploy + deployment-file helpers
+├── test/VehicleRegistry.test.js       # 44 tests
 ├── hardhat.config.js
-├── package.json
-├── .env.example               # SEPOLIA_RPC_URL, PRIVATE_KEY (never commit .env)
+├── .env.example                       # SEPOLIA_RPC_URL, PRIVATE_KEY, ETHERSCAN_API_KEY
 ├── frontend/
-│   ├── src/
-│   │   ├── contracts/         # VehicleRegistry.json (ABI) + address.json
-│   │   ├── context/           # WalletContext (account, role, contract)
-│   │   ├── utils/
-│   │   │   ├── ipfs.js        # upload to Pinata, build gateway URL
-│   │   │   └── format.js      # dates, addresses, rupees
-│   │   ├── components/        # Navbar, Timeline, VehicleCard, FileUpload, QRCode
-│   │   ├── pages/             # Home, Verify, Admin, Rto, Service, Insurer, MyVehicles
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── .env.example           # VITE_PINATA_JWT
-│   └── package.json
+│   ├── .env.example                   # VITE_PINATA_JWT, VITE_RPC_URL, VITE_CHAIN_ID
+│   └── src/
+│       ├── contracts/                 # ABIs + address.json (written by deploy.js)
+│       ├── config/                    # env + deployment lookup
+│       ├── constants/                 # roles, form options
+│       ├── context/WalletContext.jsx  # account, roles, network, service
+│       ├── services/
+│       │   ├── registryService.js     # the only code that calls the contract
+│       │   ├── mappers.js
+│       │   └── storage/               # Pinata, browser fallback, CID maths
+│       ├── hooks/                     # useAsync, useTransaction, useForm, notifications
+│       ├── utils/                     # format, vin, errors, timeline, PDF report
+│       ├── components/                # Navbar, Timeline, VehicleCard, FileUpload, QR, ...
+│       └── pages/                     # Home, Verify, Admin, Rto, Dealer, Service, Insurer, Bank, MyVehicles
 ├── docs/
-│   ├── architecture.png
-│   ├── use-case-diagram.png
-│   ├── sequence-transfer.png
+│   ├── DESIGN.md  FUNCTIONS.md  gas-report.txt
+│   ├── diagrams/                      # architecture, use case, class, sequences, activity, DFD (.mmd + .png)
 │   └── screenshots/
+├── CHECKLIST.md
 └── README.md
 ```
 
@@ -420,7 +437,7 @@ Write `test/VehicleRegistry.test.js` covering at least the cases in [section 13]
 1. Get a free RPC URL from **Alchemy** or **Infura** for Sepolia and free Sepolia ETH from a faucet.
 2. Add the `sepolia` network in `hardhat.config.js` using values from `.env`.
 3. Deploy: `npx hardhat run scripts/deploy.js --network sepolia`.
-4. Optionally verify the contract on Etherscan (`npx hardhat verify --network sepolia <address>`), so the code is publicly visible.
+4. Optionally verify the contracts on Etherscan so the code is publicly visible: `npx hardhat verify --network sepolia <VehicleNFT address> <admin address>` and `npx hardhat verify --network sepolia <VehicleRegistry address> <admin address> <VehicleNFT address>` (addresses are printed by the deploy script and saved in `frontend/src/contracts/address.json`). Then build the frontend with `VITE_CHAIN_ID=11155111` and a Sepolia `VITE_RPC_URL`.
 5. Optionally host the frontend on **Vercel** or **Netlify**.
 
 ### Phase 7: Polish, report and presentation (Week 8)
@@ -462,12 +479,27 @@ npx hardhat run scripts/seed.js   --network localhost
 
 # 6. Start the frontend
 cd frontend
-cp .env.example .env      # put your VITE_PINATA_JWT here
+cp .env.example .env      # optional: put your VITE_PINATA_JWT here
 npm install
 npm run dev               # open http://localhost:5173
 ```
 
-Then in MetaMask switch to **Hardhat Local** (`http://127.0.0.1:8545`, chain ID `31337`) and import the test accounts.
+Then in MetaMask switch to **Hardhat Local** (`http://127.0.0.1:8545`, chain ID `31337`; the app offers to add it) and import the test accounts. `npx hardhat node` prints their private keys; these are public Hardhat test keys, never use them on a real network. The seed script uses them as:
+
+| Account | Role | Seeded name |
+|---|---|---|
+| #0 | Admin | |
+| #1 | RTO | Hyderabad RTO |
+| #2 | Service centre | Speedy Motors Service |
+| #3 | Insurer | SafeDrive Insurance |
+| #4 | Bank | City Bank Auto Loans |
+| #5 | Manufacturer / dealer | Maruti Dealer Hyderabad |
+| #6 | Owner A | |
+| #7 | Owner B | |
+
+**Without a Pinata key** everything still works: uploaded documents get a real IPFS CID and are kept in the uploading browser, so the on-chain CID and the "verify hash" check behave the same. Add `VITE_PINATA_JWT` to make documents open on any device.
+
+**Phone / QR demo:** start the node with `npx hardhat node --hostname 0.0.0.0`, set `VITE_RPC_URL=http://<your-laptop-LAN-IP>:8545` in `frontend/.env`, restart `npm run dev`, and scan the QR code on a vehicle page with a phone on the same Wi-Fi.
 
 > If MetaMask shows a "nonce too high" error after restarting `hardhat node`, go to MetaMask → Settings → Advanced → **Clear activity tab data**.
 
@@ -626,4 +658,3 @@ Typical college project report sections:
 | | | Documentation, diagrams, report |
 
 **Guide:** _(teacher's name)_
-# Blockchain-Based-Vehicle-Ownership-Service-History

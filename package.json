@@ -11,7 +11,10 @@
     "node": "hardhat node",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost",
     "seed:local": "hardhat run scripts/seed.js --network localhost",
-    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia"
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "frontend:dev": "npm --prefix frontend run dev",
+    "frontend:build": "npm --prefix frontend run build",
+    "node:lan": "hardhat node --hostname 0.0.0.0"
   },
   "license": "MIT",
   "dependencies": {

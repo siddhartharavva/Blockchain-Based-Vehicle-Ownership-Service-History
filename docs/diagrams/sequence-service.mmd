@@ -1,0 +1,18 @@
+sequenceDiagram
+  actor S as Service centre
+  participant UI as React app
+  participant IPFS as IPFS
+  participant C as VehicleRegistry
+  S->>UI: Search VIN / plate
+  UI->>C: getVehicle(vin) (free read)
+  C-->>UI: vehicle incl. lastOdometer
+  S->>UI: odometer, type, cost, invoice file
+  UI->>IPFS: upload invoice
+  IPFS-->>UI: CID
+  UI->>C: addServiceRecord(vin, km, type, desc, cost, CID)
+  alt km >= lastOdometer
+    C-->>UI: emit ServiceRecordAdded
+  else km < lastOdometer
+    C-->>UI: revert OdometerRollback(last, km)
+    UI-->>S: "Odometer cannot be lower than the previous reading"
+  end

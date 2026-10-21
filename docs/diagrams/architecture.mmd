@@ -1,0 +1,20 @@
+flowchart TB
+  subgraph Browser["React frontend (Vite)"]
+    Pages["Pages: Verify, Admin, RTO, Dealer,<br/>Service, Insurer, Bank, My Vehicles"]
+    Ctx["WalletContext<br/>(account, roles, service)"]
+    Svc["RegistryService<br/>(only module that calls the contract)"]
+    Store["storage provider<br/>Pinata or browser fallback"]
+    Pages --> Ctx --> Svc
+    Pages --> Store
+  end
+  MM["MetaMask<br/>(signs transactions)"]
+  subgraph Chain["Ethereum: Hardhat local / Sepolia"]
+    Reg["VehicleRegistry<br/>roles · vehicles · transfers · services<br/>accidents · policies · loans · private docs · events"]
+    NFT["VehicleNFT (ERC-721 title token)"]
+    Reg -- "mint / move" --> NFT
+  end
+  IPFS[("IPFS via Pinata<br/>RC scans, invoices, reports")]
+  Svc -- "writes (signed)" --> MM --> Reg
+  Svc -- "reads (JSON-RPC, no wallet)" --> Reg
+  Store -- "upload / fetch by CID" --> IPFS
+  Reg -. "stores CID only" .-> IPFS

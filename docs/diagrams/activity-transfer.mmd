@@ -1,0 +1,13 @@
+flowchart TD
+  S([Owner wants to sell]) --> I{Owner of vehicle?}
+  I -- no --> X1[Reject: NotVehicleOwner]
+  I -- yes --> T{Stolen or active loan<br/>or transfer pending?}
+  T -- yes --> X2[Reject with reason]
+  T -- no --> P[Create pending request]
+  P --> D{Buyer decision}
+  D -- decline --> C[Request cancelled]
+  D -- accept --> Q[Waiting for RTO]
+  Q --> R{RTO approves?<br/>re-check stolen / loan}
+  R -- blocked --> X3[Reject with reason]
+  R -- approve --> O[Owner updated, history appended,<br/>title NFT moved]
+  O --> E([Done])

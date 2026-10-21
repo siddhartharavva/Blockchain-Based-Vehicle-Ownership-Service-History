@@ -1,0 +1,42 @@
+classDiagram
+  class AccessControlEnumerable { <<OpenZeppelin>> }
+  class RegistryAccess { <<abstract>> +RTO_ROLE +SERVICE_CENTER_ROLE +INSURER_ROLE +MANUFACTURER_ROLE +BANK_ROLE +setEntityName() +getEntityName() }
+  class VehicleCore { <<abstract>> +registerVehicle() +manufactureVehicle() +assignRegistrationNumber() +setStolenStatus() +getVehicle() +getOwnershipHistory() +getVehiclesByOwner() +getVinByRegNumber() #_changeOwner() #_recordOdometer() #_requireTransferable() }
+  class OwnershipTransferModule { <<abstract>> +initiateTransfer() +acceptTransfer() +approveTransfer() +cancelTransfer() +getPendingTransferVins() }
+  class ServiceHistoryModule { <<abstract>> +addServiceRecord() +getServiceHistory() }
+  class InsuranceModule { <<abstract>> +addAccidentRecord() +addInsurancePolicy() +getAccidentHistory() +getInsurancePolicies() }
+  class LoanModule { <<abstract>> +addLoan() +clearLoan() +hasActiveLoan() #_requireTransferable() }
+  class DocumentAccessModule { <<abstract>> +addPrivateDocument() +grantDocumentAccess() +revokeDocumentAccess() +getPrivateDocuments() }
+  class VehicleRegistry
+  class IVehicleNFT { <<interface>> +mint() +move() }
+  class VehicleNFT { ERC721 +setRegistry() +setBaseURI() +tokenURI() }
+  class Vehicle { vin registrationNumber make model year color engineNumber currentOwner lastOdometer documentCID isStolen exists registeredAt }
+  class OwnershipRecord { owner fromTimestamp toTimestamp }
+  class ServiceRecord { timestamp odometer serviceType description cost invoiceCID serviceCenter }
+  class AccidentRecord { timestamp description severity claimAmount reportCID insurer }
+  class InsurancePolicy { timestamp policyNumber validFrom validUntil policyCID insurer }
+  class LoanRecord { lender amount documentCID startedAt clearedAt active }
+  class TransferRequest { from to buyerAccepted active }
+  class PrivateDocument { timestamp label cid addedBy }
+  AccessControlEnumerable <|-- RegistryAccess
+  RegistryAccess <|-- VehicleCore
+  VehicleCore <|-- OwnershipTransferModule
+  VehicleCore <|-- ServiceHistoryModule
+  VehicleCore <|-- InsuranceModule
+  VehicleCore <|-- LoanModule
+  VehicleCore <|-- DocumentAccessModule
+  OwnershipTransferModule <|-- VehicleRegistry
+  ServiceHistoryModule <|-- VehicleRegistry
+  InsuranceModule <|-- VehicleRegistry
+  LoanModule <|-- VehicleRegistry
+  DocumentAccessModule <|-- VehicleRegistry
+  IVehicleNFT <|.. VehicleNFT
+  VehicleCore --> IVehicleNFT : depends on
+  VehicleCore *-- Vehicle
+  VehicleCore *-- OwnershipRecord
+  OwnershipTransferModule *-- TransferRequest
+  ServiceHistoryModule *-- ServiceRecord
+  InsuranceModule *-- AccidentRecord
+  InsuranceModule *-- InsurancePolicy
+  LoanModule *-- LoanRecord
+  DocumentAccessModule *-- PrivateDocument
