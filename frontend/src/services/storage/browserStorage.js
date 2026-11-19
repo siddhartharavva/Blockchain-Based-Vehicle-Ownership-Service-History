@@ -27,6 +27,10 @@ export function createBrowserStorage() {
       return entry.bytes;
     },
 
+    publicUrl() {
+      return null;
+    },
+
     async openUrl(cid) {
       const entry = await get(key(cid));
       if (!entry) throw new Error("This document is not stored in this browser. Configure Pinata to share files.");

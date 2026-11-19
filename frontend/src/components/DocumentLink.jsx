@@ -8,6 +8,7 @@ import { storage, verifyDocument } from "../services/storage";
 export function DocumentLink({ cid, label = "Document" }) {
   const [check, setCheck] = useState({ state: "idle", message: "" });
   if (!cid) return null;
+  const publicUrl = storage.publicUrl?.(cid) || null;
 
   const open = async () => {
     try {
@@ -29,16 +30,28 @@ export function DocumentLink({ cid, label = "Document" }) {
 
   return (
     <span className="doc-link">
-      <button type="button" className="link" onClick={open}>
-        📄 {label}
-      </button>
+      {publicUrl ? (
+        <a href={publicUrl} target="_blank" rel="noopener noreferrer">
+          📄 {label}
+        </a>
+      ) : (
+        <button type="button" className="link" onClick={open}>
+          📄 {label}
+        </button>
+      )}
       <button type="button" className="link small" onClick={verify} disabled={check.state === "checking"}>
         verify hash
       </button>
       {check.state !== "idle" && <span className={`badge badge-${check.state}`}>{check.message}</span>}
-      <code className="cid" title={cid}>
-        {cid.slice(0, 10)}…
-      </code>
+      {publicUrl ? (
+        <a className="cid" href={publicUrl} target="_blank" rel="noopener noreferrer" title={`Open on IPFS: ${cid}`}>
+          <code>{cid.slice(0, 10)}…</code>
+        </a>
+      ) : (
+        <code className="cid" title={cid}>
+          {cid.slice(0, 10)}…
+        </code>
+      )}
     </span>
   );
 }

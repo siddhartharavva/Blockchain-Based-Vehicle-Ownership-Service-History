@@ -57,27 +57,29 @@ These records are scattered across RTOs, service centres, insurers and the owner
 
 ## 3. Why Blockchain
 
-| Need | How blockchain helps |
-|---|---|
-| Records must not be altered | Data on-chain is immutable; corrections are new entries, not edits |
+
+| Need                                | How blockchain helps                                                |
+| ------------------------------------- | --------------------------------------------------------------------- |
+| Records must not be altered         | Data on-chain is immutable; corrections are new entries, not edits  |
 | Many organizations, no single owner | A shared ledger that RTO, service centres and insurers all write to |
-| Trust who wrote a record | Every transaction is signed by the writer's wallet address |
-| Public verifiability | Anyone can read the chain and check the history |
-| Audit trail | Every event has a timestamp, block number and transaction hash |
+| Trust who wrote a record            | Every transaction is signed by the writer's wallet address          |
+| Public verifiability                | Anyone can read the chain and check the history                     |
+| Audit trail                         | Every event has a timestamp, block number and transaction hash      |
 
 Large files (invoices, RC scans, photos) are **not** stored on-chain because it is expensive. They go to **IPFS**, and only their content hash (CID) is stored on-chain, so any change to the file would change the hash and be detected.
 
 ## 4. Users and Roles
 
-| Role | Who | What they can do |
-|---|---|---|
-| **Admin** | Project deployer / system owner | Grant and revoke roles for authorities, service centres and insurers |
-| **Registration Authority (RTO)** | Government transport office | Register new vehicles, approve ownership transfers, flag stolen/blacklisted vehicles |
-| **Manufacturer / Dealer** *(optional)* | Car maker or first dealer | Create the initial vehicle record with VIN and specs |
-| **Owner** | Vehicle owner (any wallet) | View own vehicles, initiate transfer, accept incoming transfer, share history |
-| **Service Centre** | Authorized garage / workshop | Add service and maintenance records with odometer reading and invoice |
-| **Insurance Company** | Insurer | Add insurance policies and accident/claim records |
-| **Verifier / Buyer / Public** | Anyone | Search by VIN or scan QR code to see the full verified history (read-only) |
+
+| Role                                   | Who                             | What they can do                                                                     |
+| ---------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------- |
+| **Admin**                              | Project deployer / system owner | Grant and revoke roles for authorities, service centres and insurers                 |
+| **Registration Authority (RTO)**       | Government transport office     | Register new vehicles, approve ownership transfers, flag stolen/blacklisted vehicles |
+| **Manufacturer / Dealer** *(optional)* | Car maker or first dealer       | Create the initial vehicle record with VIN and specs                                 |
+| **Owner**                              | Vehicle owner (any wallet)      | View own vehicles, initiate transfer, accept incoming transfer, share history        |
+| **Service Centre**                     | Authorized garage / workshop    | Add service and maintenance records with odometer reading and invoice                |
+| **Insurance Company**                  | Insurer                         | Add insurance policies and accident/claim records                                    |
+| **Verifier / Buyer / Public**          | Anyone                          | Search by VIN or scan QR code to see the full verified history (read-only)           |
 
 Roles are implemented using **OpenZeppelin `AccessControl`**.
 
@@ -85,51 +87,52 @@ Roles are implemented using **OpenZeppelin `AccessControl`**.
 
 ### 5.1 Must-have (core, implement these first)
 
-- [x] **Wallet login** with MetaMask (the wallet address is the user identity).
-- [x] **Role-based access control**: admin can add/remove RTO, service centres and insurers.
-- [x] **Vehicle registration** by RTO: VIN, registration number, make, model, year, colour, engine number, first owner, document hash.
-- [x] **Ownership transfer** in steps: owner initiates → buyer accepts → RTO approves → owner updated. Full ownership history kept.
-- [x] **Service records** added by authorized service centres: date, odometer, service type, description, cost, invoice on IPFS.
-- [x] **Odometer validation**: the contract rejects a reading lower than the last recorded reading.
-- [x] **Accident / insurance records** added by insurers.
-- [x] **Vehicle history page**: search by VIN and see a timeline of every event with the transaction hash.
-- [x] **Document upload to IPFS** with the CID stored on-chain.
-- [x] **Events** emitted for every action, so the frontend can build the timeline.
+- [X]  **Wallet login** with MetaMask (the wallet address is the user identity).
+- [X]  **Role-based access control**: admin can add/remove RTO, service centres and insurers.
+- [X]  **Vehicle registration** by RTO: VIN, registration number, make, model, year, colour, engine number, first owner, document hash.
+- [X]  **Ownership transfer** in steps: owner initiates → buyer accepts → RTO approves → owner updated. Full ownership history kept.
+- [X]  **Service records** added by authorized service centres: date, odometer, service type, description, cost, invoice on IPFS.
+- [X]  **Odometer validation**: the contract rejects a reading lower than the last recorded reading.
+- [X]  **Accident / insurance records** added by insurers.
+- [X]  **Vehicle history page**: search by VIN and see a timeline of every event with the transaction hash.
+- [X]  **Document upload to IPFS** with the CID stored on-chain.
+- [X]  **Events** emitted for every action, so the frontend can build the timeline.
 
 ### 5.2 Should-have (good for marks, do after core works)
 
-- [x] **QR code** for each vehicle that opens its public history page.
-- [x] **Stolen / blacklist flag** set by RTO; transfers are blocked while flagged.
-- [x] **Verification badge**: shows who wrote each record (RTO, which service centre) and whether the IPFS file matches the stored hash.
-- [x] **Dashboard per role** (RTO, service centre, insurer, owner).
-- [x] **Downloadable history report** (PDF) for a buyer.
+- [X]  **QR code** for each vehicle that opens its public history page.
+- [X]  **Stolen / blacklist flag** set by RTO; transfers are blocked while flagged.
+- [X]  **Verification badge**: shows who wrote each record (RTO, which service centre) and whether the IPFS file matches the stored hash.
+- [X]  **Dashboard per role** (RTO, service centre, insurer, owner).
+- [X]  **Downloadable history report** (PDF) for a buyer.
 
 ### 5.3 Nice-to-have (only if time allows)
 
-- [x] Vehicle represented as an **NFT (ERC-721)**, where the token owner is the vehicle owner.
-- [x] Owner can grant **time-limited access** to private documents to a specific buyer.
-- [x] Notifications when a transfer request arrives.
-- [x] Loan/hypothecation record by a bank that blocks transfer until cleared.
+- [X]  Vehicle represented as an **NFT (ERC-721)**, where the token owner is the vehicle owner.
+- [X]  Owner can grant **time-limited access** to private documents to a specific buyer.
+- [X]  Notifications when a transfer request arrives.
+- [X]  Loan/hypothecation record by a bank that blocks transfer until cleared.
 
 ## 6. Tech Stack
 
 Chosen to be free, well-documented and realistic for a college project.
 
-| Layer | Technology | Why |
-|---|---|---|
-| Smart contracts | **Solidity ^0.8.20** | Standard language for Ethereum |
-| Contract libraries | **OpenZeppelin Contracts** | Audited `AccessControl` (and `ERC721` if using NFTs) |
-| Development framework | **Hardhat** | Compile, test, local blockchain, deploy scripts |
-| Local blockchain | **Hardhat Network** (`npx hardhat node`) | Free, instant, gives 20 test accounts |
-| Public testnet | **Ethereum Sepolia** (or Polygon Amoy) | Free test ETH, shows it works on a real network |
-| Frontend | **React + Vite** | Fast, simple setup |
-| Blockchain library | **ethers.js v6** | Talk to the contract from the browser |
-| Wallet | **MetaMask** browser extension | Signing transactions, user identity |
-| File storage | **IPFS via Pinata** (free tier) | Store invoices, RC scans and photos off-chain |
-| Styling | **Tailwind CSS** (or plain CSS) | Quick, clean UI |
-| QR codes | `qrcode.react` | Generate vehicle QR codes |
-| Testing | **Hardhat + Mocha/Chai** | Unit tests for every contract function |
-| Version control | **Git + GitHub** | Teamwork and submission |
+
+| Layer                 | Technology                               | Why                                                 |
+| ----------------------- | ------------------------------------------ | ----------------------------------------------------- |
+| Smart contracts       | **Solidity ^0.8.20**                     | Standard language for Ethereum                      |
+| Contract libraries    | **OpenZeppelin Contracts**               | Audited`AccessControl` (and `ERC721` if using NFTs) |
+| Development framework | **Hardhat**                              | Compile, test, local blockchain, deploy scripts     |
+| Local blockchain      | **Hardhat Network** (`npx hardhat node`) | Free, instant, gives 20 test accounts               |
+| Public testnet        | **Ethereum Sepolia** (or Polygon Amoy)   | Free test ETH, shows it works on a real network     |
+| Frontend              | **React + Vite**                         | Fast, simple setup                                  |
+| Blockchain library    | **ethers.js v6**                         | Talk to the contract from the browser               |
+| Wallet                | **MetaMask** browser extension           | Signing transactions, user identity                 |
+| File storage          | **IPFS via Pinata** (free tier)          | Store invoices, RC scans and photos off-chain       |
+| Styling               | **Tailwind CSS** (or plain CSS)          | Quick, clean UI                                     |
+| QR codes              | `qrcode.react`                           | Generate vehicle QR codes                           |
+| Testing               | **Hardhat + Mocha/Chai**                 | Unit tests for every contract function              |
+| Version control       | **Git + GitHub**                         | Teamwork and submission                             |
 
 No traditional database or backend server is required: the blockchain is the database and IPFS is the file store. The React app talks to both directly.
 
@@ -160,23 +163,27 @@ No traditional database or backend server is required: the blockchain is the dat
 ### Main flows
 
 **Registration**
+
 1. RTO opens "Register Vehicle", fills details, uploads the RC document.
 2. Frontend uploads the file to IPFS and gets a CID.
 3. Frontend calls `registerVehicle(...)` with details and CID; MetaMask asks RTO to sign.
 4. Contract stores the vehicle and emits `VehicleRegistered`.
 
 **Ownership transfer**
+
 1. Owner calls `initiateTransfer(vin, buyerAddress)`.
 2. Buyer calls `acceptTransfer(vin)`.
 3. RTO calls `approveTransfer(vin)`. The contract updates the owner, appends to ownership history and emits `OwnershipTransferred`.
 4. Either party can cancel before approval.
 
 **Service record**
+
 1. Service centre uploads invoice to IPFS.
 2. Calls `addServiceRecord(vin, odometer, serviceType, description, cost, cid)`.
 3. Contract checks the caller has `SERVICE_CENTER_ROLE` and that `odometer >= lastOdometer`.
 
 **Verification**
+
 1. Anyone enters a VIN or scans the QR code.
 2. Frontend reads vehicle details, ownership history, service and accident records (read calls are free, no wallet needed).
 3. Timeline is shown with who wrote each record, the date and a link to the transaction and document.
@@ -261,23 +268,24 @@ string[] private allVins;
 
 ### 8.4 Functions
 
-| Function | Who can call | Description |
-|---|---|---|
-| `grantRole(role, account)` | Admin | Inherited from AccessControl |
-| `registerVehicle(vin, regNo, make, model, year, color, engineNo, owner, docCID)` | RTO | Creates a vehicle; VIN must be unique |
-| `initiateTransfer(vin, to)` | Current owner | Creates a pending transfer; blocked if stolen |
-| `acceptTransfer(vin)` | Buyer (`to`) | Buyer consents |
-| `approveTransfer(vin)` | RTO | Completes the transfer after buyer accepted |
-| `cancelTransfer(vin)` | Owner or buyer | Cancels a pending transfer |
-| `addServiceRecord(vin, odometer, type, desc, cost, cid)` | Service centre | Rejects odometer lower than last |
-| `addAccidentRecord(vin, desc, severity, amount, cid)` | Insurer | Adds accident/claim |
-| `setStolenStatus(vin, bool)` | RTO | Flags or clears stolen status |
-| `getVehicle(vin)` | Anyone | Returns vehicle details |
-| `getOwnershipHistory(vin)` | Anyone | Returns all owners |
-| `getServiceHistory(vin)` | Anyone | Returns all service records |
-| `getAccidentHistory(vin)` | Anyone | Returns all accident records |
-| `getVehiclesByOwner(address)` | Anyone | Returns VINs owned |
-| `getVinByRegNumber(regNo)` | Anyone | Lookup by number plate |
+
+| Function                                                                         | Who can call   | Description                                   |
+| ---------------------------------------------------------------------------------- | ---------------- | ----------------------------------------------- |
+| `grantRole(role, account)`                                                       | Admin          | Inherited from AccessControl                  |
+| `registerVehicle(vin, regNo, make, model, year, color, engineNo, owner, docCID)` | RTO            | Creates a vehicle; VIN must be unique         |
+| `initiateTransfer(vin, to)`                                                      | Current owner  | Creates a pending transfer; blocked if stolen |
+| `acceptTransfer(vin)`                                                            | Buyer (`to`)   | Buyer consents                                |
+| `approveTransfer(vin)`                                                           | RTO            | Completes the transfer after buyer accepted   |
+| `cancelTransfer(vin)`                                                            | Owner or buyer | Cancels a pending transfer                    |
+| `addServiceRecord(vin, odometer, type, desc, cost, cid)`                         | Service centre | Rejects odometer lower than last              |
+| `addAccidentRecord(vin, desc, severity, amount, cid)`                            | Insurer        | Adds accident/claim                           |
+| `setStolenStatus(vin, bool)`                                                     | RTO            | Flags or clears stolen status                 |
+| `getVehicle(vin)`                                                                | Anyone         | Returns vehicle details                       |
+| `getOwnershipHistory(vin)`                                                       | Anyone         | Returns all owners                            |
+| `getServiceHistory(vin)`                                                         | Anyone         | Returns all service records                   |
+| `getAccidentHistory(vin)`                                                        | Anyone         | Returns all accident records                  |
+| `getVehiclesByOwner(address)`                                                    | Anyone         | Returns VINs owned                            |
+| `getVinByRegNumber(regNo)`                                                       | Anyone         | Lookup by number plate                        |
 
 ### 8.5 Events
 
@@ -302,15 +310,16 @@ event StolenStatusChanged(string indexed vin, bool isStolen);
 
 ## 9. Frontend Pages
 
-| Page | Route | Who | Contents |
-|---|---|---|---|
-| Home | `/` | Everyone | Project intro, "Connect Wallet", VIN search box |
-| Verify Vehicle | `/vehicle/:vin` | Everyone | Vehicle details, ownership timeline, service history, accidents, stolen badge, QR code, document links |
-| Admin Panel | `/admin` | Admin | Grant/revoke RTO, service centre, insurer roles; list role holders |
-| RTO Dashboard | `/rto` | RTO | Register vehicle form, pending transfers to approve, mark stolen |
-| Service Centre Dashboard | `/service` | Service centre | Search VIN, add service record with invoice upload |
-| Insurer Dashboard | `/insurer` | Insurer | Add accident/claim record |
-| My Vehicles | `/my-vehicles` | Owner | Owned vehicles, start transfer, incoming transfer requests to accept |
+
+| Page                     | Route           | Who            | Contents                                                                                               |
+| -------------------------- | ----------------- | ---------------- | -------------------------------------------------------------------------------------------------------- |
+| Home                     | `/`             | Everyone       | Project intro, "Connect Wallet", VIN search box                                                        |
+| Verify Vehicle           | `/vehicle/:vin` | Everyone       | Vehicle details, ownership timeline, service history, accidents, stolen badge, QR code, document links |
+| Admin Panel              | `/admin`        | Admin          | Grant/revoke RTO, service centre, insurer roles; list role holders                                     |
+| RTO Dashboard            | `/rto`          | RTO            | Register vehicle form, pending transfers to approve, mark stolen                                       |
+| Service Centre Dashboard | `/service`      | Service centre | Search VIN, add service record with invoice upload                                                     |
+| Insurer Dashboard        | `/insurer`      | Insurer        | Add accident/claim record                                                                              |
+| My Vehicles              | `/my-vehicles`  | Owner          | Owned vehicles, start transfer, incoming transfer requests to accept                                   |
 
 The navbar shows only the pages the connected wallet's role allows. The frontend detects the role with `hasRole(role, address)`.
 
@@ -486,16 +495,17 @@ npm run dev               # open http://localhost:5173
 
 Then in MetaMask switch to **Hardhat Local** (`http://127.0.0.1:8545`, chain ID `31337`; the app offers to add it) and import the test accounts. `npx hardhat node` prints their private keys; these are public Hardhat test keys, never use them on a real network. The seed script uses them as:
 
-| Account | Role | Seeded name |
-|---|---|---|
-| #0 | Admin | |
-| #1 | RTO | Hyderabad RTO |
-| #2 | Service centre | Speedy Motors Service |
-| #3 | Insurer | SafeDrive Insurance |
-| #4 | Bank | City Bank Auto Loans |
-| #5 | Manufacturer / dealer | Maruti Dealer Hyderabad |
-| #6 | Owner A | |
-| #7 | Owner B | |
+
+| Account | Role                  | Seeded name             |
+| --------- | ----------------------- | ------------------------- |
+| #0      | Admin                 |                         |
+| #1      | RTO                   | Hyderabad RTO           |
+| #2      | Service centre        | Speedy Motors Service   |
+| #3      | Insurer               | SafeDrive Insurance     |
+| #4      | Bank                  | City Bank Auto Loans    |
+| #5      | Manufacturer / dealer | Maruti Dealer Hyderabad |
+| #6      | Owner A               |                         |
+| #7      | Owner B               |                         |
 
 **Without a Pinata key** everything still works: uploaded documents get a real IPFS CID and are kept in the uploading browser, so the on-chain CID and the "verify hash" check behave the same. Add `VITE_PINATA_JWT` to make documents open on any device.
 
@@ -506,6 +516,7 @@ Then in MetaMask switch to **Hardhat Local** (`http://127.0.0.1:8545`, chain ID 
 ### Environment variables
 
 `.env` (root, for deployment to testnet only):
+
 ```
 SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/<key>
 PRIVATE_KEY=<test wallet private key, never a real one>
@@ -513,6 +524,7 @@ ETHERSCAN_API_KEY=<optional>
 ```
 
 `frontend/.env`:
+
 ```
 VITE_PINATA_JWT=<pinata jwt>
 VITE_PINATA_GATEWAY=https://gateway.pinata.cloud/ipfs/
@@ -524,25 +536,26 @@ Add both `.env` files to `.gitignore`.
 
 ### Unit tests (Hardhat)
 
-| # | Test case | Expected |
-|---|---|---|
-| 1 | Deployer has admin role | Pass |
-| 2 | Admin grants RTO role | RTO can register |
-| 3 | Non-RTO tries to register a vehicle | Reverts |
-| 4 | Register vehicle with valid data | Stored, event emitted, owner history has 1 entry |
-| 5 | Register duplicate VIN | Reverts |
-| 6 | Register with VIN not 17 chars | Reverts |
-| 7 | Non-owner initiates transfer | Reverts |
-| 8 | Full transfer: initiate → accept → approve | Owner changed, history has 2 entries |
-| 9 | RTO approves before buyer accepts | Reverts |
-| 10 | Transfer while vehicle is stolen | Reverts |
-| 11 | Cancel pending transfer | Request cleared |
-| 12 | Service centre adds record | Stored, lastOdometer updated |
-| 13 | Service record with lower odometer | Reverts (rollback detected) |
-| 14 | Non-service-centre adds service record | Reverts |
-| 15 | Insurer adds accident record | Stored |
-| 16 | Revoked service centre adds record | Reverts |
-| 17 | Read functions work without a wallet | Returns data |
+
+| #  | Test case                                    | Expected                                         |
+| ---- | ---------------------------------------------- | -------------------------------------------------- |
+| 1  | Deployer has admin role                      | Pass                                             |
+| 2  | Admin grants RTO role                        | RTO can register                                 |
+| 3  | Non-RTO tries to register a vehicle          | Reverts                                          |
+| 4  | Register vehicle with valid data             | Stored, event emitted, owner history has 1 entry |
+| 5  | Register duplicate VIN                       | Reverts                                          |
+| 6  | Register with VIN not 17 chars               | Reverts                                          |
+| 7  | Non-owner initiates transfer                 | Reverts                                          |
+| 8  | Full transfer: initiate → accept → approve | Owner changed, history has 2 entries             |
+| 9  | RTO approves before buyer accepts            | Reverts                                          |
+| 10 | Transfer while vehicle is stolen             | Reverts                                          |
+| 11 | Cancel pending transfer                      | Request cleared                                  |
+| 12 | Service centre adds record                   | Stored, lastOdometer updated                     |
+| 13 | Service record with lower odometer           | Reverts (rollback detected)                      |
+| 14 | Non-service-centre adds service record       | Reverts                                          |
+| 15 | Insurer adds accident record                 | Stored                                           |
+| 16 | Revoked service centre adds record           | Reverts                                          |
+| 17 | Read functions work without a wallet         | Returns data                                     |
 
 Check coverage with `npx hardhat coverage`.
 
@@ -555,12 +568,13 @@ Check coverage with `npx hardhat coverage`.
 
 ## 14. Deployment
 
-| Target | Command / Service |
-|---|---|
-| Local | `npx hardhat node` + `scripts/deploy.js --network localhost` |
-| Testnet | `scripts/deploy.js --network sepolia` (needs RPC URL + funded test wallet) |
-| Frontend hosting | `npm run build` in `frontend/` and deploy `dist/` to Vercel or Netlify |
-| Contract source | Verify on Sepolia Etherscan with `npx hardhat verify` |
+
+| Target           | Command / Service                                                          |
+| ------------------ | ---------------------------------------------------------------------------- |
+| Local            | `npx hardhat node` + `scripts/deploy.js --network localhost`               |
+| Testnet          | `scripts/deploy.js --network sepolia` (needs RPC URL + funded test wallet) |
+| Frontend hosting | `npm run build` in `frontend/` and deploy `dist/` to Vercel or Netlify     |
+| Contract source  | Verify on Sepolia Etherscan with`npx hardhat verify`                       |
 
 For the college demo, **local Hardhat is the most reliable**; show Sepolia as proof it runs on a public network.
 
@@ -612,27 +626,27 @@ Practise this end to end; it shows every feature in about 10 minutes.
 
 Typical college project report sections:
 
-- [ ] Title page, certificate, acknowledgement
-- [ ] Abstract (150 to 250 words)
-- [ ] Introduction and problem statement
-- [ ] Objectives and scope
-- [ ] Literature survey (5 to 10 papers or articles on blockchain vehicle registries)
-- [ ] Existing system vs proposed system (comparison table)
-- [ ] Requirements: functional, non-functional, hardware, software
-- [ ] Feasibility study (technical, economic, operational)
-- [ ] System architecture diagram
-- [ ] UML: use case, class diagram (structs), sequence diagrams (registration, transfer, service record), activity diagram
-- [ ] Data flow diagrams (Level 0 and Level 1)
-- [ ] Smart contract design (structs, functions, events, roles)
-- [ ] Module description (Admin, RTO, Service Centre, Insurer, Owner, Verifier)
-- [ ] Implementation with key code snippets
-- [ ] Testing: test case table with results and coverage
-- [ ] Screenshots of every page
-- [ ] Gas cost table for each function (Hardhat gas reporter: `REPORT_GAS=true npx hardhat test`)
-- [ ] Results and discussion
-- [ ] Limitations and future scope
-- [ ] Conclusion
-- [ ] References
+- [ ]  Title page, certificate, acknowledgement
+- [ ]  Abstract (150 to 250 words)
+- [ ]  Introduction and problem statement
+- [ ]  Objectives and scope
+- [ ]  Literature survey (5 to 10 papers or articles on blockchain vehicle registries)
+- [ ]  Existing system vs proposed system (comparison table)
+- [ ]  Requirements: functional, non-functional, hardware, software
+- [ ]  Feasibility study (technical, economic, operational)
+- [ ]  System architecture diagram
+- [ ]  UML: use case, class diagram (structs), sequence diagrams (registration, transfer, service record), activity diagram
+- [ ]  Data flow diagrams (Level 0 and Level 1)
+- [ ]  Smart contract design (structs, functions, events, roles)
+- [ ]  Module description (Admin, RTO, Service Centre, Insurer, Owner, Verifier)
+- [ ]  Implementation with key code snippets
+- [ ]  Testing: test case table with results and coverage
+- [ ]  Screenshots of every page
+- [ ]  Gas cost table for each function (Hardhat gas reporter: `REPORT_GAS=true npx hardhat test`)
+- [ ]  Results and discussion
+- [ ]  Limitations and future scope
+- [ ]  Conclusion
+- [ ]  References
 
 ## 20. References
 
@@ -650,11 +664,12 @@ Typical college project report sections:
 
 ### Team
 
-| Name | Roll No. | Responsibility |
-|---|---|---|
-| | | Smart contracts and tests |
-| | | Frontend |
-| | | IPFS integration and deployment |
-| | | Documentation, diagrams, report |
+
+| Name | Roll No. | Responsibility                  |
+| ------ | ---------- | --------------------------------- |
+|      |          | Smart contracts and tests       |
+|      |          | Frontend                        |
+|      |          | IPFS integration and deployment |
+|      |          | Documentation, diagrams, report |
 
 **Guide:** _(teacher's name)_

@@ -12,6 +12,7 @@ import { buildTimeline } from "../utils/timeline";
 import { downloadHistoryReport } from "../utils/report";
 import { formatDate, formatKm, shortAddress } from "../utils/format";
 import { normalizeVin } from "../utils/vin";
+import { vehiclePageUrl } from "../config";
 
 export function Verify() {
   const vin = normalizeVin(useParams().vin);
@@ -40,7 +41,7 @@ export function Verify() {
       owners,
       timeline,
       nameOf: (a) => (names[a] ? `${names[a]} (${a})` : a),
-      pageUrl: window.location.href,
+      pageUrl: vehiclePageUrl(vehicle.vin),
     });
     setPdfBusy(false);
   };

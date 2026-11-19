@@ -32,5 +32,10 @@ export function createPinataStorage({ jwt, gateway }) {
     async openUrl(cid) {
       return gatewayUrl(cid);
     },
+
+    /** Public link anyone can open (phone, another laptop); null when files are browser-only. */
+    publicUrl(cid) {
+      return gatewayUrl(cid);
+    },
   };
 }
